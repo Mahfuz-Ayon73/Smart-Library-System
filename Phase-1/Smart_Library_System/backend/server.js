@@ -1,9 +1,22 @@
 import express from 'express'
+import dotenv from 'dotenv'
+import connectToDatabase from './db/ConnectToDatabase.js';
+import userRoute from "./routes/user.route.js"
 
+dotenv.config();
+
+const PORT = process.env.PORT || 3000;
 const app = express();
 
+app.use(express.json()) 
+
+app.use('/api/users',userRoute);
+
 app.get('/',(req,res) => {
-    res.send('<p>Welcome to server</p>')
+    res.send('<p>Server working</p>')
 })
 
-app.listen(3000,() => console.log('Server started at Port:3000'))
+app.listen(PORT,() => {
+    connectToDatabase();
+    console.log('Server started to Port : ',PORT);
+})
