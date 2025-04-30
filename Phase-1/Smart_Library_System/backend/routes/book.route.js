@@ -1,11 +1,14 @@
 import express from 'express';
+import {AddBook,SearchBook,UpdateBook,RemoveBook} from '../controllers/book.controller.js';
 
 const router = express.Router();
 
 router.post('/add',AddBook);
 
-router.put('/update',UpdateBook);
+router.get('/',SearchBook);
 
-router.delete('/remove',RemoveBook);
+router.patch('/update/:id',UpdateBook);
+
+router.delete('/remove/:id',RemoveBook);
 
 export default router;
