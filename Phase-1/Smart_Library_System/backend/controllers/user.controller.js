@@ -37,13 +37,13 @@ async function Register(req, res) {
     }
 }
 
-async function Retrieve(req,res) {
+async function Retrieve(req, res) {
     try {
-        const {id} = req.params;
+        const { id } = req.params;
 
-        const foundUser = await User.findOne({_id : id});
+        const foundUser = await User.findOne({ _id: id });
 
-        if(foundUser){
+        if (foundUser) {
             res.status(201).json({
                 "id": foundUser._id,
                 "name": foundUser.name,
@@ -51,19 +51,40 @@ async function Retrieve(req,res) {
                 "role": foundUser.role
             })
         }
-        else{
+        else {
             res.status(400).json({
-                message:"Invalid User Id"
+                message: "Invalid User Id"
             })
         }
 
-    } 
+    }
     catch (error) {
-        console.log('Error on Retrieve user ',error.message);
+        console.log('Error on Retrieve user ', error.message);
         res.status(500).json({
-            error:"Internal server error"
+            error: "Internal server error"
         })
     }
 }
 
-export { Register,Retrieve };
+async function Update(req, res) {
+    try {
+        const { id } = req.params;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { $set: req.body },
+            { new: true }
+        );
+
+        if(updatedUser){
+            res.status(201).json({
+                message:{updatedUser}
+            })
+        }
+    }
+    catch (error) {
+
+    }
+}
+
+export { Register, Retrieve ,Update};
