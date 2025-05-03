@@ -17,7 +17,10 @@ const loanSchema = new mongoose.Schema(
             default : Date.now
         },
         due_date: {
-            type: Date,
+            type: Date
+        },
+        return_date:{
+            type: Date
         },
         status: {
             type: String,
