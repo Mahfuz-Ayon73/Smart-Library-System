@@ -1,5 +1,6 @@
 import Book from "../models/book.model.js";
 import Loan from "../models/loan.model.js";
+import User from "../models/user.model.js"
 
 async function IssueBook(req, res) {
     try {
@@ -118,4 +119,65 @@ async function UserLoanHistory(req,res) {
     }
 }
 
-export { IssueBook, ReturnBook , UserLoanHistory};
+async function OverDueLoans(req,res) {
+    try {
+        const allLoans = await Loan.find();
+
+        let overDueLoans = [];
+
+        const currentData = new Date();
+
+        const millisecondsInADay = 1000 * 60 * 60 * 24;
+
+        for(let loan of allLoans){
+            if(loan.due_date < currentData){
+                let user = await User.findById(loan.user_id);
+                let book = await Book.findById(loan.book_id);
+                const daysOverdue = Math.ceil((currentData- loan.due_date) / millisecondsInADay);
+
+                const formatLoan = {
+                    "id" : loan._id,
+                    "user":{
+                        "id":user._id,
+                        "name":user.name,
+                        "email":user.email
+                    },
+                    "book":{
+                        "id":book._id,
+                        "title":book.title,
+                        "author":book.author,
+                    },
+                    "issue_date":loan.issue_date,
+                    "due_date":loan.due_date,
+                    "days_overdue":daysOverdue
+                }
+
+                overDueLoans.push(formatLoan);
+            }
+        }
+
+        res.status(200).json(overDueLoans);
+    } 
+    catch (error) {
+        console.log("Error in Loan Controller");
+        res.status(500).json({
+            error: "Internal Server Error"
+        })
+    }
+}
+
+async function ExtendDate(req,res) {
+    try {
+        const data = req.params;
+
+        log(data);
+    }
+    catch (error) {
+        console.log("Error in Loan Controller");
+        res.status(500).json({
+            error: "Internal Server Error"
+        })
+    }
+}
+
+export { IssueBook, ReturnBook , UserLoanHistory , OverDueLoans};
