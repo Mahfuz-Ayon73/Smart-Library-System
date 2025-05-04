@@ -25,7 +25,12 @@ const loanSchema = new mongoose.Schema(
         status: {
             type: String,
             required: true
+        },
+        extensions_count:{
+            type : Number,
+            default : 0
         }
+        
     },
     {
         timestamps: true

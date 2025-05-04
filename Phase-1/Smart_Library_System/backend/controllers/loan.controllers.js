@@ -11,7 +11,7 @@ async function IssueBook(req, res) {
             book_id,
             issue_date: new Date(),
             due_date,
-            return_date : null,
+            return_date: null,
             status: "ACTIVE"
         })
 
@@ -49,7 +49,7 @@ async function ReturnBook(req, res) {
         const updatedLoan = await Loan.findByIdAndUpdate(loan_id,
             {
                 status: "RETURNED",
-                return_date : new Date()
+                return_date: new Date()
             },
             { new: true }
         );
@@ -72,27 +72,27 @@ async function ReturnBook(req, res) {
     }
 }
 
-async function UserLoanHistory(req,res) {
+async function UserLoanHistory(req, res) {
     try {
 
-        const {id} = req.params;
+        const { id } = req.params;
 
-        const allLoans = await Loan.find({user_id : id});
- 
-        if(allLoans){
+        const allLoans = await Loan.find({ user_id: id });
+
+        if (allLoans) {
 
             let loans = [];
-             
-            for(let loan of allLoans){
-                
+
+            for (let loan of allLoans) {
+
                 const getBook = await Book.findById(loan.book_id);
 
                 let loanFormat = {
                     "id": loan._id,
                     "book": {
-                      "id": getBook._id,
-                      "title": getBook.title,
-                      "author": getBook.author
+                        "id": getBook._id,
+                        "title": getBook.title,
+                        "author": getBook.author
                     },
                     "issue_date": loan.issue_date,
                     "due_date": loan.due_date,
@@ -102,15 +102,15 @@ async function UserLoanHistory(req,res) {
 
                 loans.push(loanFormat);
             }
-        
+
             res.status(201).json(loans);
         }
-        else{
+        else {
             res.status(401).json({
-                message:"All loans failed to show"
+                message: "All loans failed to show"
             })
         }
-    } 
+    }
     catch (error) {
         console.log("Error in Loan Controller");
         res.status(500).json({
@@ -119,7 +119,7 @@ async function UserLoanHistory(req,res) {
     }
 }
 
-async function OverDueLoans(req,res) {
+async function OverDueLoans(req, res) {
     try {
         const allLoans = await Loan.find();
 
@@ -129,27 +129,27 @@ async function OverDueLoans(req,res) {
 
         const millisecondsInADay = 1000 * 60 * 60 * 24;
 
-        for(let loan of allLoans){
-            if(loan.due_date < currentData){
+        for (let loan of allLoans) {
+            if (loan.due_date < currentData) {
                 let user = await User.findById(loan.user_id);
                 let book = await Book.findById(loan.book_id);
-                const daysOverdue = Math.ceil((currentData- loan.due_date) / millisecondsInADay);
+                const daysOverdue = Math.ceil((currentData - loan.due_date) / millisecondsInADay);
 
                 const formatLoan = {
-                    "id" : loan._id,
-                    "user":{
-                        "id":user._id,
-                        "name":user.name,
-                        "email":user.email
+                    "id": loan._id,
+                    "user": {
+                        "id": user._id,
+                        "name": user.name,
+                        "email": user.email
                     },
-                    "book":{
-                        "id":book._id,
-                        "title":book.title,
-                        "author":book.author,
+                    "book": {
+                        "id": book._id,
+                        "title": book.title,
+                        "author": book.author,
                     },
-                    "issue_date":loan.issue_date,
-                    "due_date":loan.due_date,
-                    "days_overdue":daysOverdue
+                    "issue_date": loan.issue_date,
+                    "due_date": loan.due_date,
+                    "days_overdue": daysOverdue
                 }
 
                 overDueLoans.push(formatLoan);
@@ -157,7 +157,7 @@ async function OverDueLoans(req,res) {
         }
 
         res.status(200).json(overDueLoans);
-    } 
+    }
     catch (error) {
         console.log("Error in Loan Controller");
         res.status(500).json({
@@ -166,11 +166,48 @@ async function OverDueLoans(req,res) {
     }
 }
 
-async function ExtendDate(req,res) {
+async function ExtendDate(req, res) {
     try {
-        const data = req.params;
+        const { id } = req.params;
 
-        log(data);
+        const { extension_days } = req.body;
+
+        const getLoan = await Loan.findById(id);
+
+        const original_due_date = new Date(getLoan.due_date);
+
+        const extended_date = new Date(original_due_date.getTime() + extension_days * 24 * 60 * 60 * 1000);
+
+        const updatedLoan = await Loan.findByIdAndUpdate(
+            id,
+            {
+                "due_date": extended_date,
+                "extensions_count": (getLoan.extensions_count || 0) + 1
+            },
+            {
+                new: true
+            }
+        )
+
+        if (updatedLoan) {
+            res.status(200).json({
+
+                "id": updatedLoan._id,
+                "user_id": updatedLoan.user_id,
+                "book_id": updatedLoan.book_id,
+                "issue_date": updatedLoan.issue_date,
+                "original_due_date": original_due_date,
+                "extended_due_date": updatedLoan.due_date,
+                "status": updatedLoan.status,
+                "extensions_count": updatedLoan.extensions_count
+
+            });
+        }
+        else {
+            res.status(400).json({
+                message: "Failed to Update Loan"
+            })
+        }
     }
     catch (error) {
         console.log("Error in Loan Controller");
@@ -180,4 +217,4 @@ async function ExtendDate(req,res) {
     }
 }
 
-export { IssueBook, ReturnBook , UserLoanHistory , OverDueLoans};
+export { IssueBook, ReturnBook, UserLoanHistory, OverDueLoans, ExtendDate };
