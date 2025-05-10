@@ -1,8 +1,19 @@
-import Loan from "../models/loan.model.js";
+import Loan from "../models/loan.models.js";
+import axios from "axios";
 
 async function IssueBook(req, res) {
     try {
         const { user_id, book_id, due_date } = req.body;
+
+        const bookResponse = await axios.get(`http://localhost:8081/api/books/getbook/${book_id}`);
+
+        const book = bookResponse.data;
+
+        if (book.available_copies <= 0) {
+            return res.status(400).json({
+                message: "No available book to borrow"
+            })
+        }
 
         const newLoan = new Loan({
             user_id,
@@ -14,8 +25,14 @@ async function IssueBook(req, res) {
         })
 
         const isLoanCreated = await newLoan.save();
+        
+        await axios.patch(`http://localhost:8081/api/books/update/${book_id}`,
+            {
+                available_copies: book.available_copies - 1
+            }
+        );
+        console.log("Book updated");
 
-        await updateIssuedBook(book_id);
 
         if (isLoanCreated) {
 
@@ -86,11 +103,11 @@ async function UserLoanHistory(req, res) {
 
             for (let loan of allLoans) {
 
-                const foundBook = await getBook(loan.book_id);
+                const foundBook = await axios.get(`http://localhost:8081/api/books/getbook/${loan.book_id}`);
 
-                if(loan.status === "ACTIVE"){
+                if (loan.status === "ACTIVE") {
                     console.log(foundBook);
-                
+
                     let loanFormat = {
                         "id": loan._id,
                         "book": {
@@ -103,7 +120,7 @@ async function UserLoanHistory(req, res) {
                         "return_date": loan.return_date,
                         "status": loan.status
                     }
-    
+
                     loans.push(loanFormat);
                 }
             }
@@ -136,8 +153,8 @@ async function OverDueLoans(req, res) {
 
         for (let loan of allLoans) {
             if (loan.due_date < currentData) {
-                let user = await getUser(loan.user_id);
-                let book = await getBook(loan.book_id);
+                let user = await axios.get(`http://localhost:8080/api/users/retrieve/${loan.user_id}`);
+                let book = await axios.get(`http://localhost:8081/api/books/getbook/${loan.book_id}`);
                 const daysOverdue = Math.ceil((currentData - loan.due_date) / millisecondsInADay);
 
                 const formatLoan = {

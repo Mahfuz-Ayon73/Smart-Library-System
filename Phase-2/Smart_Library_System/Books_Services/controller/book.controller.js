@@ -38,6 +38,30 @@ async function AddBook(req, res) {
     }
 }
 
+async function GetBookByID(req, res) {
+    try {
+        const { id } = req.params;
+        const isBookFound = await Book.findById(id);
+
+        if (isBookFound) {
+            res.status(200).json(isBookFound);
+            console.log("Book Found");
+        }
+        else {
+            res.status(404).json({
+                message: "No Book Found"
+            })
+            console.log("No Book Found");
+        }
+    }
+    catch (error) {
+        console.log('Error on book controller', error);
+        res.status(500).json({
+            error: "Internal Server Error"
+        })
+    }
+}
+
 async function SearchBook(req, res) {
     try {
         const searchQuery = req.query.search;
@@ -130,53 +154,4 @@ async function RemoveBook(req, res) {
     }
 }
 
-async function updateIssuedBook(id) {
-    try {
-        const updatedBook = await Book.findByIdAndUpdate(
-            id,
-            {
-                $inc: { available_copies: -1 }
-            }
-        )
-
-        if (updatedBook) {
-            console.log('Book borrowed Successfully');
-        }
-        else {
-            console.log('Book not found');
-        }
-    }
-    catch (error) {
-        console.log('Error on book controller', error);
-        res.status(500).json({
-            error: "Internal Server Error"
-        })
-    }
-}
-
-async function updateReturnedBook(id) {
-    try {
-        const updatedBook = await Book.findByIdAndUpdate(
-            id,
-            {
-                $inc: { available_copies: 1 }
-            }
-        )
-
-        if (updatedBook) {
-            console.log('Book Returned Successfully');
-        }
-        else {
-            console.log('Book not found');
-        }
-    }
-    catch (error) {
-        console.log('Error on book controller', error);
-        res.status(500).json({
-            error: "Internal Server Error"
-        })
-    }
-
-}
-
-export { AddBook, SearchBook, UpdateBook, RemoveBook, updateIssuedBook, updateReturnedBook };
+export { AddBook, SearchBook, UpdateBook, RemoveBook, GetBookByID };
