@@ -1,25 +1,22 @@
 import mongoose from "mongoose";
 
-const bookSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
     {
-        title: {
+        name: {
             type: String,
             required: true
         },
-        author: {
+        email: {
             type: String,
             required: true
         },
-        isbn: {
+        password: {
             type: String,
             required: true
         },
-        copies: {
-            type: Number,
+        role: {
+            type: String,
             required: true
-        },
-        available_copies : {
-            type: Number
         }
     },
     {
@@ -27,6 +24,6 @@ const bookSchema = new mongoose.Schema(
     }
 )
 
-const Book = mongoose.model("Book",bookSchema);
+const User = mongoose.model("User",userSchema);
 
-export default Book;
+export default User;

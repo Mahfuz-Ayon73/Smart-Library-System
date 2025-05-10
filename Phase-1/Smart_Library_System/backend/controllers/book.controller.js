@@ -130,4 +130,72 @@ async function RemoveBook(req,res) {
     }
 }
 
-export {AddBook,SearchBook,UpdateBook,RemoveBook};
+async function getBook(id) {
+    try {
+        const book = await Book.findById(id);
+
+        if(book){
+            return book;
+        }
+        else{
+            console.log("Book not found");
+        }
+    } 
+    catch (error) {
+        console.log('Error on book controller' , error);
+        res.status(500).json({
+            error:"Internal Server Error"
+        })
+    }
+}
+
+async function updateIssuedBook(id) {
+    try {
+        const updatedBook = await Book.findByIdAndUpdate(
+            id,
+            {
+                $inc: { available_copies: -1 }
+            }
+        )
+
+        if(updatedBook){
+            console.log('Book borrowed Successfully');
+        }
+        else{
+            console.log('Book not found');
+        }
+    } 
+    catch (error) {
+        console.log('Error on book controller' , error);
+        res.status(500).json({
+            error:"Internal Server Error"
+        })
+    } 
+}
+
+async function updateReturnedBook(id) {
+    try {
+        const updatedBook = await Book.findByIdAndUpdate(
+            id,
+            {
+                $inc: { available_copies: 1 }
+            }
+        )
+
+        if(updatedBook){
+            console.log('Book Returned Successfully');
+        }
+        else{
+            console.log('Book not found');
+        }
+    } 
+    catch (error) {
+        console.log('Error on book controller' , error);
+        res.status(500).json({
+            error:"Internal Server Error"
+        })
+    }
+    
+}
+
+export {AddBook,SearchBook,UpdateBook,RemoveBook,getBook , updateIssuedBook , updateReturnedBook};

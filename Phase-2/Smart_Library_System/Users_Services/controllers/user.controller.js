@@ -90,23 +90,4 @@ async function Update(req, res) {
     }
 }
 
-async function getUser(id) {
-    try {
-        const user = await User.findById(id);
-
-        if(user){
-            return user;
-        }
-        else{
-            console.log('User not Found');
-        }
-    } 
-    catch (error) {
-        console.log('Error on Retrieve user ', error.message);
-        res.status(500).json({
-            error: "Internal server error"
-        })
-    }
-}
-
-export { Register, Retrieve ,Update , getUser};
+export { Register, Retrieve ,Update};

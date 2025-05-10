@@ -1,6 +1,4 @@
 import Loan from "../models/loan.model.js";
-import { getBook, updateIssuedBook, updateReturnedBook } from "./book.controller.js";
-import { getUser } from "./user.controller.js";
 
 async function IssueBook(req, res) {
     try {
