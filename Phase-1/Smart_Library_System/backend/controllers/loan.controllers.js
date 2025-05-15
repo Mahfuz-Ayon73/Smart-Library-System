@@ -6,6 +6,12 @@ async function IssueBook(req, res) {
     try {
         const { user_id, book_id, due_date } = req.body;
 
+        const book = await getBook(book_id);
+
+        if (!book || book.available_copies === 0) {
+            return res.status(404).json({ message: "Book not available for loan" });
+          }
+
         const newLoan = new Loan({
             user_id,
             book_id,
@@ -31,7 +37,7 @@ async function IssueBook(req, res) {
             })
         }
         else {
-            res.status(401).json({
+            res.status(400).json({
                 message: "Loan Failed to create"
             })
         }
@@ -57,12 +63,12 @@ async function ReturnBook(req, res) {
         );
 
         if (updatedLoan) {
-            res.status(201).json(updatedLoan);
+            res.status(200).json(updatedLoan);
             await updateReturnedBook(updatedLoan.book_id);
         }
         else {
-            res.status(401).json({
-                message: "Loan failed to Return"
+            res.status(404).json({
+                message: "Loan not found"
             });
         }
 
@@ -90,30 +96,31 @@ async function UserLoanHistory(req, res) {
 
                 const foundBook = await getBook(loan.book_id);
 
-                if(loan.status === "ACTIVE"){
-                    console.log(foundBook);
-                
-                    let loanFormat = {
-                        "id": loan._id,
-                        "book": {
-                            "id": foundBook._id,
-                            "title": foundBook.title,
-                            "author": foundBook.author
-                        },
-                        "issue_date": loan.issue_date,
-                        "due_date": loan.due_date,
-                        "return_date": loan.return_date,
-                        "status": loan.status
-                    }
-    
-                    loans.push(loanFormat);
+                if(!foundBook){
+                    console.log('Book not found');
+                    continue;
                 }
+
+                let loanFormat = {
+                    "id": loan._id,
+                    "book": {
+                        "id": foundBook._id,
+                        "title": foundBook.title,
+                        "author": foundBook.author
+                    },
+                    "issue_date": loan.issue_date,
+                    "due_date": loan.due_date,
+                    "return_date": loan.return_date,
+                    "status": loan.status
+                }
+
+                loans.push(loanFormat);
             }
 
-            res.status(201).json(loans);
+            res.status(200).json(loans);
         }
         else {
-            res.status(401).json({
+            res.status(404).json({
                 message: "All loans failed to show"
             })
         }
@@ -139,7 +146,19 @@ async function OverDueLoans(req, res) {
         for (let loan of allLoans) {
             if (loan.due_date < currentData) {
                 let user = await getUser(loan.user_id);
+
+                if(!user){
+                    console.log('User not found');
+                    continue;
+                }
+
                 let book = await getBook(loan.book_id);
+
+                if(!book){
+                    console.log('Book not found');
+                    continue;
+                }
+
                 const daysOverdue = Math.ceil((currentData - loan.due_date) / millisecondsInADay);
 
                 const formatLoan = {
@@ -224,4 +243,4 @@ async function ExtendDate(req, res) {
     }
 }
 
-export { IssueBook, ReturnBook, UserLoanHistory, OverDueLoans, ExtendDate };
+export { IssueBook, ReturnBook, UserLoanHistory, OverDueLoans, ExtendDate};

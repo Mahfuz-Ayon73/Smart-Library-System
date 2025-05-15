@@ -1,13 +1,18 @@
 import User from "../models/user.model.js";
+import bcrypt from "bcrypt";
 
 async function Register(req, res) {
     try {
         const { name, email, password, role } = req.body;
+        const salt = 10;
+        let hashedPassword;
+
+        hashedPassword = await bcrypt.hash(password,salt);
 
         const newUser = new User({
             name,
             email,
-            password,
+            password : hashedPassword,
             role
         });
 
@@ -19,7 +24,6 @@ async function Register(req, res) {
                 "name": newUser.name,
                 "email": newUser.email,
                 "role": newUser.role,
-                "password": newUser.password
             })
         }
 
@@ -44,7 +48,7 @@ async function Retrieve(req, res) {
         const foundUser = await User.findOne({ _id: id });
 
         if (foundUser) {
-            res.status(201).json({
+            res.status(200).json({
                 "id": foundUser._id,
                 "name": foundUser.name,
                 "email": foundUser.email,
@@ -52,7 +56,7 @@ async function Retrieve(req, res) {
             })
         }
         else {
-            res.status(400).json({
+            res.status(404).json({
                 message: "Invalid User Id"
             })
         }
@@ -77,8 +81,13 @@ async function Update(req, res) {
         );
 
         if(updatedUser){
-            res.status(201).json({
+            res.status(200).json({
                 message:{updatedUser}
+            })
+        }
+        else{
+            res.status(404).json({
+                message : "User not Found"
             })
         }
     }
@@ -103,9 +112,7 @@ async function getUser(id) {
     } 
     catch (error) {
         console.log('Error on Retrieve user ', error.message);
-        res.status(500).json({
-            error: "Internal server error"
-        })
+        return null;
     }
 }
 
