@@ -243,4 +243,23 @@ async function ExtendDate(req, res) {
     }
 }
 
-export { IssueBook, ReturnBook, UserLoanHistory, OverDueLoans, ExtendDate};
+async function getAllLoans() {
+    try {
+        const allLoans = await Loan.find({});
+
+        if(allLoans){
+            return allLoans;
+        }
+        else{
+            console.log("Failed to get all the loans");
+            return null;
+        }
+    } 
+    catch (error) {
+        console.log("Error in Loan Controller");
+        return null;
+    }
+}
+
+
+export { IssueBook, ReturnBook, UserLoanHistory, OverDueLoans, ExtendDate , getAllLoans};
