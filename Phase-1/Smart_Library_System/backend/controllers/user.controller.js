@@ -116,4 +116,20 @@ async function getUser(id) {
     }
 }
 
-export { Register, Retrieve ,Update , getUser};
+async function getTotalUsers() {
+    try {
+        const totalUsers = await User.countDocuments();
+        if(totalUsers){
+            return totalUsers;
+        }
+        else{
+            console.log('Counld not get totalUsers');   
+            return; 
+        }
+    } 
+    catch (error) {
+        console.log('Error occured in the getTotalUsers:',error.message);
+    }
+}
+
+export { Register, Retrieve ,Update , getUser , getTotalUsers};

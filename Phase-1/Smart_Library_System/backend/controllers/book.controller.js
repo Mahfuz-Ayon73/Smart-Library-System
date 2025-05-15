@@ -157,12 +157,12 @@ async function updateIssuedBook(id) {
 
         const searchedBook = await getBook(id);
 
-        if(!searchedBook){
+        if (!searchedBook) {
             console.log("Book not found");
             return null;
         }
 
-        if(searchedBook.available_copies === 0){
+        if (searchedBook.available_copies === 0) {
             console.log("No available Books");
             return null;
         }
@@ -210,4 +210,51 @@ async function updateReturnedBook(id) {
 
 }
 
-export { AddBook, SearchBook, UpdateBook, RemoveBook, getBook, updateIssuedBook, updateReturnedBook };
+async function getTotalBookCopies() {
+    try {
+        const result = await Book.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalCopies: { $sum: "$copies" }
+                }
+            }
+        ]);
+
+        if (result.length > 0) {
+            return result[0].totalCopies;
+        } else {
+            console.log('No books found or copies are all zero.');
+            return 0;
+        }
+    } catch (error) {
+        console.log('Error occurred in getTotalBookCopies:', error.message);
+        return 0;
+    }
+}
+
+async function getTotalAvailableBookCopies() {
+    try {
+        const totalAvailableBooks = await Book.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalAvailableCopies: { $sum: "$available_copies" }
+                }
+            }
+        ]);
+
+        if (totalAvailableBooks.length > 0) {
+            return totalAvailableBooks[0].totalAvailableCopies;
+        }
+        else {
+            console.log('Counld not get totalBooks');
+            return;
+        }
+    }
+    catch (error) {
+        console.log('Error occured in the getTotalBooks:', error.message);
+    }
+}
+
+export { AddBook, SearchBook, UpdateBook, RemoveBook, getBook, updateIssuedBook, updateReturnedBook, getTotalBookCopies, getTotalAvailableBookCopies };
