@@ -24,7 +24,7 @@ async function Register(req, res) {
         }
 
         else {
-            res.status(400).json({
+            res.status(404).json({
                 error: "Invalid User Data"
             })
         }
@@ -44,7 +44,7 @@ async function Retrieve(req, res) {
         const foundUser = await User.findOne({ _id: id });
 
         if (foundUser) {
-            res.status(201).json({
+            res.status(200).json({
                 "id": foundUser._id,
                 "name": foundUser.name,
                 "email": foundUser.email,
@@ -52,7 +52,7 @@ async function Retrieve(req, res) {
             })
         }
         else {
-            res.status(400).json({
+            res.status(404).json({
                 message: "Invalid User Id"
             })
         }
@@ -77,7 +77,7 @@ async function Update(req, res) {
         );
 
         if(updatedUser){
-            res.status(201).json({
+            res.status(200).json({
                 message:{updatedUser}
             })
         }

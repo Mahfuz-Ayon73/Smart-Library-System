@@ -105,15 +105,16 @@ async function UserLoanHistory(req, res) {
 
                 const foundBook = await axios.get(`http://localhost:8081/api/books/getbook/${loan.book_id}`);
 
-                if (loan.status === "ACTIVE") {
-                    console.log(foundBook);
+                const book = foundBook.data;
+
+                    console.log(book);
 
                     let loanFormat = {
                         "id": loan._id,
                         "book": {
-                            "id": foundBook._id,
-                            "title": foundBook.title,
-                            "author": foundBook.author
+                            "id": book._id,
+                            "title": book.title,
+                            "author": book.author
                         },
                         "issue_date": loan.issue_date,
                         "due_date": loan.due_date,
@@ -122,13 +123,12 @@ async function UserLoanHistory(req, res) {
                     }
 
                     loans.push(loanFormat);
-                }
             }
 
-            res.status(201).json(loans);
+            res.status(200).json(loans);
         }
         else {
-            res.status(401).json({
+            res.status(404).json({
                 message: "All loans failed to show"
             })
         }
@@ -153,8 +153,10 @@ async function OverDueLoans(req, res) {
 
         for (let loan of allLoans) {
             if (loan.due_date < currentData) {
-                let user = await axios.get(`http://localhost:8080/api/users/retrieve/${loan.user_id}`);
-                let book = await axios.get(`http://localhost:8081/api/books/getbook/${loan.book_id}`);
+                let foundUser = await axios.get(`http://localhost:8080/api/users/retrieve/${loan.user_id}`);
+                let user = foundUser.data;
+                let foundBook = await axios.get(`http://localhost:8081/api/books/getbook/${loan.book_id}`);
+                let book = foundBook.data;
                 const daysOverdue = Math.ceil((currentData - loan.due_date) / millisecondsInADay);
 
                 const formatLoan = {

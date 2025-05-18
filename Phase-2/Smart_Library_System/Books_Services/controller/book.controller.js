@@ -25,7 +25,7 @@ async function AddBook(req, res) {
             })
         }
         else {
-            res.status(401).json({
+            res.status(404).json({
                 message: "Error saving new book"
             })
         }
@@ -46,6 +46,7 @@ async function GetBookByID(req, res) {
         if (isBookFound) {
             res.status(200).json(isBookFound);
             console.log("Book Found");
+            return isBookFound;
         }
         else {
             res.status(404).json({
@@ -78,16 +79,16 @@ async function SearchBook(req, res) {
             const foundBook = await Book.find(filter);
 
             if (foundBook) {
-                res.status(201).json(foundBook)
+                res.status(200).json(foundBook)
             }
             else {
-                res.status(401).json({
+                res.status(404).json({
                     message: "No books found"
                 })
             }
         }
         else {
-            res.status(401).json({
+            res.status(400).json({
                 message: "search query is empty"
             })
         }
@@ -111,11 +112,11 @@ async function UpdateBook(req, res) {
         );
 
         if (updatedBook) {
-            res.status(201).json(updatedBook)
+            res.status(200).json(updatedBook)
         }
 
         else {
-            res.status(401).json({
+            res.status(404).json({
                 message: "Unable to update book"
             })
         }
@@ -141,7 +142,7 @@ async function RemoveBook(req, res) {
             })
         }
         else {
-            res.status(401).json({
+            res.status(404).json({
                 message: "Book not found"
             })
         }
