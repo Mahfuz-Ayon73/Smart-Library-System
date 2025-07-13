@@ -5,7 +5,7 @@ async function IssueBook(req, res) {
     try {
         const { user_id, book_id, due_date } = req.body;
 
-        const bookResponse = await axios.get(`http://localhost:8081/api/books/getbook/${book_id}`);
+        const bookResponse = await axios.get(`http://books-services:8081/api/books/getbook/${book_id}`);
 
         const book = bookResponse.data;
 
@@ -26,7 +26,7 @@ async function IssueBook(req, res) {
 
         const isLoanCreated = await newLoan.save();
         
-        await axios.patch(`http://localhost:8081/api/books/update/${book_id}`,
+        await axios.patch(`http://books-services:8081/api/books/update/${book_id}`,
             {
                 available_copies: book.available_copies - 1
             }
@@ -73,12 +73,12 @@ async function ReturnBook(req, res) {
 
         if (updatedLoan) {
 
-            const bookResponse = await axios.get(`http://localhost:8081/api/books/getbook/${updatedLoan.book_id}`);
+            const bookResponse = await axios.get(`http://books-services:8081/api/books/getbook/${updatedLoan.book_id}`);
 
             const book = bookResponse.data;
 
             res.status(200).json(updatedLoan);
-            await axios.patch(`http://localhost:8081/api/books/update/${book._id}`,
+            await axios.patch(`http://books-services:8081/api/books/update/${book._id}`,
                 {
                     available_copies: book.available_copies + 1
                 }
@@ -112,7 +112,7 @@ async function UserLoanHistory(req, res) {
 
             for (let loan of allLoans) {
 
-                const foundBook = await axios.get(`http://localhost:8081/api/books/getbook/${loan.book_id}`);
+                const foundBook = await axios.get(`http://books-services:8081/api/books/getbook/${loan.book_id}`);
 
                 const book = foundBook.data;
 
@@ -162,9 +162,9 @@ async function OverDueLoans(req, res) {
 
         for (let loan of allLoans) {
             if (loan.due_date < currentData) {
-                let foundUser = await axios.get(`http://localhost:8080/api/users/retrieve/${loan.user_id}`);
+                let foundUser = await axios.get(`http://users-services:8080/api/users/retrieve/${loan.user_id}`);
                 let user = foundUser.data;
-                let foundBook = await axios.get(`http://localhost:8081/api/books/getbook/${loan.book_id}`);
+                let foundBook = await axios.get(`http://books-services:8081/api/books/getbook/${loan.book_id}`);
                 let book = foundBook.data;
                 const daysOverdue = Math.ceil((currentData - loan.due_date) / millisecondsInADay);
 
