@@ -1,0 +1,25 @@
+services:
+  users-service:
+    build: ./Users_Services
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  books-service:
+    build: ./Books_Services
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+
+  loans-service:
+    build: ./Loans_Services
+    ports:
+      - "8082:8082"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
